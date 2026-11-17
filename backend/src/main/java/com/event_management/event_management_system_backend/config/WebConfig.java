@@ -1,5 +1,6 @@
 package com.event_management.event_management_system_backend.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,12 +20,16 @@ public class WebConfig {
     private static final Long MAX_AGE = 3600L;
     private static final int CORS_FILTER_ORDER = -102;
 
+    // Orígenes permitidos (separados por coma). En AWS se define con la variable CORS_ALLOWED_ORIGINS.
     @Bean
-    public CorsFilter corsFilter() {
+    public CorsFilter corsFilter(
+            @Value("${app.cors.allowed-origins:http://localhost:5173}") String[] allowedOrigins) {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:5173/");
+        for (String origin : allowedOrigins) {
+            config.addAllowedOrigin(origin.trim());
+        }
         config.setAllowedHeaders(Arrays.asList(
                 HttpHeaders.AUTHORIZATION,
                 HttpHeaders.CONTENT_TYPE,

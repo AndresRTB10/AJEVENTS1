@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
+import { API_URL } from "../config";
 
 const ChatAI = () => {
   const [mensaje, setMensaje] = useState("");
@@ -19,7 +20,7 @@ const ChatAI = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:8080/ai/preguntar",
+        `${API_URL}/ai/preguntar`,
         { mensaje }
       );
 

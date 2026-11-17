@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
+import { API_URL } from "../config";
 
 const ChatAssistant = () => {
   const [open, setOpen] = useState(false);
@@ -42,7 +43,7 @@ const ChatAssistant = () => {
 
     try {
       const response = await axios.get(
-        "http://localhost:8080/mcp/chat",
+        `${API_URL}/mcp/chat`,
         {
           params: {
             message: textoUsuario,

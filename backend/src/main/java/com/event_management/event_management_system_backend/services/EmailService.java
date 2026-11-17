@@ -4,6 +4,7 @@ package com.event_management.event_management_system_backend.services;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,10 @@ import java.io.ByteArrayInputStream;
 public class EmailService {
 
     private final JavaMailSender mailSender;
+
+    // URL pública del frontend (en AWS: variable FRONTEND_URL)
+    @Value("${app.frontend-url:http://localhost:5173}")
+    private String frontendUrl;
 
     // 📌 Correo de confirmación (sin QR)
     public void sendConfirmationEmail(String to, String subject, String username) throws MessagingException {
@@ -28,7 +33,7 @@ public class EmailService {
                 + "<p style='font-size: 15px; color: #555;'>Gracias por registrarte en <b>AJEVENTS</b>. "
                 + "Tu cuenta ha sido creada con éxito y ya puedes empezar a gestionar tus eventos.</p>"
                 + "<div style='text-align: center; margin: 20px 0;'>"
-                + "<a href='http://localhost:3000/login' style='background: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Iniciar Sesión</a>"
+                + "<a href='" + frontendUrl + "/login' style='background: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Iniciar Sesión</a>"
                 + "</div>"
                 + "<p style='font-size: 12px; color: #999; text-align: center;'>Si no fuiste tú quien creó esta cuenta, ignora este mensaje.</p>"
                 + "</div></div>";

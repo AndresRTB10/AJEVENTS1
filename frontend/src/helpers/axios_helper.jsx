@@ -1,7 +1,8 @@
 import React from 'react'
 import axios from 'axios';
+import { API_URL } from '../config';
 
-axios.defaults.baseURL = 'http://localhost:8080';
+axios.defaults.baseURL = API_URL;
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 

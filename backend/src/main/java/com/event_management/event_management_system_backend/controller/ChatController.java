@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.ObjectProvider;
+
 @RestController
 @RequestMapping("/mcp")
 public class ChatController {
@@ -17,10 +19,13 @@ public class ChatController {
     private final ChatClient chatClient;
 
     public ChatController(ChatClient.Builder builder,
-                          ToolCallbackProvider tools) {
+                          ObjectProvider<ToolCallbackProvider> tools) {
+
+        // Si el cliente MCP está desactivado (p. ej. en AWS, donde no hay Docker), no hay tools
+        // y el chat responde igualmente, solo que sin consultar la base de datos.
+        tools.ifAvailable(t -> builder.defaultToolCallbacks(t));
 
         this.chatClient = builder
-                .defaultToolCallbacks(tools)
                 .defaultSystem("""
 Eres un asistente especializado en un sistema de gestión de eventos.
 

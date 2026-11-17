@@ -9,6 +9,7 @@ import {
     DialogContent,
     Typography
 } from "@mui/material";
+import { API_URL } from "../config";
 
 function RecommendationButton() {
 
@@ -25,7 +26,7 @@ function RecommendationButton() {
             setLoading(true);
 
             const response = await fetch(
-                "http://localhost:8080/recommendations/send",
+                `${API_URL}/recommendations/send`,
                 {
                     method: "POST",
                 }
