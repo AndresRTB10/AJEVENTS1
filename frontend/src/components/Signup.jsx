@@ -1,116 +1,210 @@
-import React, { useEffect } from 'react'
-import { Box, Typography, Button } from '@mui/material'
-import CustomizedInput from './shared/CustomizedInput'
-import {toast } from 'react-hot-toast';
-import {useAuth} from '../context/AuthContext';
-import { useNavigate} from 'react-router-dom';
-import NavigationLink from './shared/NavigationLink';
-
+import React, { useEffect } from "react";
+import {
+  Box,
+  Typography,
+  Button,
+  Card,
+  CardContent,
+} from "@mui/material";
+import CustomizedInput from "./shared/CustomizedInput";
+import { toast } from "react-hot-toast";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import NavigationLink from "./shared/NavigationLink";
 
 const Signup = () => {
   const navigate = useNavigate();
   const auth = useAuth();
 
-  const handleSubmit = async (e)=>{
-
+  // 📌 Manejo del envío del formulario
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = new FormData(e.currentTarget)
-    const email = data.get("email"); //we get by name
+    const data = new FormData(e.currentTarget);
+
+    const email = data.get("email");
     const password = data.get("password");
     const name = data.get("name");
     const username = data.get("username");
 
     try {
-      toast.loading("Signing In", {id:"login"});
-      await auth?.signup(name, username, email , password);
-      toast.loading("Signed up Successfuly", {id:"signup"});
+      toast.loading("Creando cuenta...", { id: "signup" });
+      await auth?.signup(name, username, email, password);
+      toast.success("Registro exitoso ✅", { id: "signup" });
       setTimeout(() => {
         toast.dismiss();
       }, 3000);
-
     } catch (error) {
       console.log(error);
-      toast.loading("Signing up Failed", {id:"signup"});
+      toast.error("Error en el registro ❌", { id: "signup" });
       setTimeout(() => {
         toast.dismiss();
       }, 3000);
-
     }
+  };
 
-    console.log(username + " and " + password);
-  }
-
-
-    useEffect(()=>{
-      if(auth?.user)
-        {
-          toast.success("dashboard");
-          return navigate("/dashboard");
-        }
-
-    },[auth]);
-
+  // 📌 Si ya existe usuario autenticado → redirigir al dashboard
+  useEffect(() => {
+    if (auth?.user) {
+      toast.success("Bienvenido al Dashboard 🎉");
+      return navigate("/dashboard");
+    }
+  }, [auth]);
 
   return (
-      <Box
-        display={"flex"}
-        flex={{ xs: 1, md: 0.5 }}
-        justifyContent={"center"}
-        alignItems={"center"}
-        padding={2}
-        ml={"auto"}
-        mt={6}
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="100vh"
+      sx={{
+        backgroundImage: "url('/fondo.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        position: "relative",
+        "::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          bgcolor: "rgba(0,0,0,0.6)",
+          zIndex: 1,
+        },
+      }}
+    >
+      {/* 📌 Tarjeta centrada */}
+      <Card
+        sx={{
+          maxWidth: 450,
+          width: "80%",
+          borderRadius: "20px",
+          boxShadow: "0 8px 30px rgba(255, 215, 0, 0.3)", // sombra dorada
+          p: 3,
+          background: "linear-gradient(145deg, #000000, #1a1a1a)", // negro degradado
+          color: "gold",
+          position: "relative",
+          zIndex: 2,
+          border: "2px solid gold", // borde dorado
+        }}
       >
-        <form onSubmit={handleSubmit} >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-            }}
+        <CardContent>
+          {/* 📌 Título */}
+          <Typography
+            variant="h5"
+            textAlign="center"
+            fontWeight="bold"
+            sx={{ color: "gold" }}
+            gutterBottom
           >
-            <Typography
-              variant="h4"
-              textAlign="center"
-              padding={2}
-              fontWeight={600}
-              color={'black'}
-            >
-              Signup
-            </Typography>
-            <CustomizedInput type="text" name="name" label="Name" />
-            <CustomizedInput type="username" name="username" label="Username" />
-            <CustomizedInput type="email" name="email" label="Email" />
-            <CustomizedInput type="password" name="password" label="Password" />
+            Crear Cuenta
+          </Typography>
+          <Typography
+            variant="body2"
+            textAlign="center"
+            sx={{ color: "rgba(255,215,0,0.7)" }}
+            mb={3}
+          >
+            Regístrate para unirte al sistema
+          </Typography>
+
+          {/* 📌 Formulario */}
+          <form onSubmit={handleSubmit}>
+            <CustomizedInput
+              type="text"
+              name="name"
+              label="Nombre completo"
+              sx={{
+                "& .MuiInputLabel-root": { color: "gold" },
+                "& .MuiInputLabel-root.Mui-focused": { color: "gold" },
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": { borderColor: "gold" },
+                  "&:hover fieldset": { borderColor: "#d4af37" },
+                  "&.Mui-focused fieldset": { borderColor: "gold" },
+                  "& input": { color: "gold", caretColor: "gold" },
+                },
+              }}
+            />
+            <CustomizedInput
+              type="text"
+              name="username"
+              label="Usuario"
+              sx={{
+                "& .MuiInputLabel-root": { color: "gold" },
+                "& .MuiInputLabel-root.Mui-focused": { color: "gold" },
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": { borderColor: "gold" },
+                  "&:hover fieldset": { borderColor: "#d4af37" },
+                  "&.Mui-focused fieldset": { borderColor: "gold" },
+                  "& input": { color: "gold", caretColor: "gold" },
+                },
+              }}
+            />
+            <CustomizedInput
+              type="email"
+              name="email"
+              label="Correo electrónico"
+              sx={{
+                "& .MuiInputLabel-root": { color: "gold" },
+                "& .MuiInputLabel-root.Mui-focused": { color: "gold" },
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": { borderColor: "gold" },
+                  "&:hover fieldset": { borderColor: "#d4af37" },
+                  "&.Mui-focused fieldset": { borderColor: "gold" },
+                  "& input": { color: "gold", caretColor: "gold" },
+                },
+              }}
+            />
+            <CustomizedInput
+              type="password"
+              name="password"
+              label="Contraseña"
+              sx={{
+                "& .MuiInputLabel-root": { color: "gold" },
+                "& .MuiInputLabel-root.Mui-focused": { color: "gold" },
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": { borderColor: "gold" },
+                  "&:hover fieldset": { borderColor: "#d4af37" },
+                  "&.Mui-focused fieldset": { borderColor: "gold" },
+                  "& input": { color: "gold", caretColor: "gold" },
+                },
+              }}
+            />
+
+            {/* 📌 Botón principal */}
             <Button
               type="submit"
+              fullWidth
               sx={{
-                px: 2,
-                py: 1,
-                mt: 2,
-                width: "400px",
-                borderRadius: 2,
-                bgcolor: "#AE9D99",
+                mt: 3,
+                py: 1.5,
+                borderRadius: 3,
+                fontWeight: "bold",
+                fontSize: "1rem",
+                bgcolor: "gold",
                 color: "black",
                 ":hover": {
-                  bgcolor: "white",
-                  color: "black",
+                  bgcolor: "#d4af37", // dorado más oscuro
                 },
-                marginBottom:"24px"
               }}
             >
-              Signup
+              Registrarse
             </Button>
-            <NavigationLink
-                bg="#6D5147"
-                to="/"
-                text="Back To Home"
-                textColor="black"
-              />
-          </Box>
-        </form>
-      </Box>
-  )
-}
+          </form>
 
-export default Signup
+          {/* 📌 Enlace de regreso */}
+          <Box mt={3} textAlign="center">
+            <NavigationLink
+              bg="rgba(255, 215, 0, 0.1)"
+              to="/"
+              text="⬅ Volver al inicio"
+              textColor="gold"
+            />
+          </Box>
+        </CardContent>
+      </Card>
+    </Box>
+  );
+};
+
+export default Signup;

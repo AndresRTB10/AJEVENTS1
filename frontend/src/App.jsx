@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import './App.css'
+import "bootstrap/dist/css/bootstrap.min.css";
+
 import Login from './components/Login'
 import Signup from './components/Signup'
 import NotFound from './components/NotFound'
@@ -8,14 +10,13 @@ import { Home } from './components/Home'
 import { Route, Routes } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
-import Header from './components/Header'
 import AddEvent from './components/AddEvent'
 import EditEvent from './components/EditEvent'
 import ViewEvent from './components/ViewEvent'
+import PowerBIDashboard from './components/PowerBIDashboard'
 import CommonEvents from './components/CommonEvents'
 import CommonViewEvent from './components/CommonView'
 import AttendeeRegister from './components/RegisterUser'
-
 
 function App() {
 
@@ -23,7 +24,6 @@ function App() {
 
   return (
     <main>
-      <Header></Header>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login/>}/>
@@ -31,14 +31,12 @@ function App() {
         <Route path="/allEvents" element={<CommonEvents/>} />
         <Route path="/viewCommonEvent" element={<CommonViewEvent/>} />
         <Route path="/registerAttendee" element={<AttendeeRegister/>} />
-
         <Route path="*" element={<NotFound/>}/>
+        <Route path="/powerbi" element={<PowerBIDashboard/>} />
         <Route path="/dashboard/" element={<Dashboard/>} />
         <Route path="/addEvent" element={<AddEvent/>} />
         <Route path="/editEvent" element={<EditEvent/>} />
         <Route path="/viewEvent" element={<ViewEvent/>} />
-
-        
       </Routes>
     </main>
   )

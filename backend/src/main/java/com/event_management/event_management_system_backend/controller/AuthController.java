@@ -3,12 +3,15 @@ package com.event_management.event_management_system_backend.controller;
 import com.event_management.event_management_system_backend.Dto.*;
 import com.event_management.event_management_system_backend.config.UserAuthenticationProvider;
 import com.event_management.event_management_system_backend.mapper.AttendeeMapper;
-import com.event_management.event_management_system_backend.mapper.EventMapper;
+import com.event_management.event_management_system_backend.mapper.eventMapper;
 import com.event_management.event_management_system_backend.model.Attendee;
 import com.event_management.event_management_system_backend.model.Event;
 import com.event_management.event_management_system_backend.repositories.AttendeeRepository;
 import com.event_management.event_management_system_backend.repositories.EventRepository;
 import com.event_management.event_management_system_backend.services.AdminService;
+import com.event_management.event_management_system_backend.services.EmailService;
+import com.event_management.event_management_system_backend.services.QRCodeGenerator;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -26,9 +29,11 @@ public class AuthController {
     private final AdminService adminService;
     private final UserAuthenticationProvider userAuthenticationProvider;
     private final EventRepository eventRepository;
-    private final EventMapper eventMapper;
+    private final eventMapper eventMapper;
     private final AttendeeMapper attendeeMapper;
     private final AttendeeRepository attendeeRepository;
+    private final EmailService emailService;
+
 
     @PostMapping("/login")
     public ResponseEntity<AdminDto> login(@RequestBody @Valid CredentialsDto credentialsDto){
@@ -38,12 +43,31 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AdminDto> register(@RequestBody @Valid SignUpDto signUpDto){
+    public ResponseEntity<AdminDto> register(@RequestBody @Valid SignUpDto signUpDto) throws MessagingException {
         System.out.println(signUpDto);
 
         AdminDto newAdmin = adminService.register(signUpDto);
         newAdmin.setToken(userAuthenticationProvider.createToken(newAdmin.getUsername()));
-        return ResponseEntity.created(URI.create("/admins/" + newAdmin.getId())).body(newAdmin);
+
+        // Email de bienvenida en HTML
+        String subject = "🎉 Bienvenido a AJEVENTS 🎉";
+        String body = "<div style='font-family: Arial, sans-serif; color: #333;'>"
+                + "<h2 style='color: #4CAF50;'>¡Hola " + newAdmin.getUsername() + "!</h2>"
+                + "<p>Tu registro en el <b>Sistema de Gestión de Eventos</b> fue <span style='color: green;'>exitoso</span>. ✅</p>"
+                + "<p>Ahora puedes disfrutar de todas nuestras funcionalidades:</p>"
+                + "<ul>"
+                + "  <li>📅 Crear y gestionar eventos</li>"
+                + "  <li>👥 Registrar asistentes</li>"
+                + "  <li>💬 Recibir notificaciones importantes</li>"
+                + "</ul>"
+                + "<p style='margin-top:20px;'>Gracias por confiar en nosotros.<br>"
+                + "Atentamente, <br><b>El equipo de AJEVENTS</b></p>"
+                + "</div>";
+
+        emailService.sendConfirmationEmail(newAdmin.getEmail(), subject, body);
+
+        return ResponseEntity.created(URI.create("/admins/" + newAdmin.getId()))
+                .body(newAdmin);
     }
 
     @PostMapping("/addevent")
@@ -124,13 +148,32 @@ public class AuthController {
 
     @PostMapping("/addattendee")
     public ResponseEntity<Attendee> addAttendee(@RequestBody @Valid Attendee attendee){
-        System.out.println(attendee.getEventid());
-
+        System.out.println("Nuevo asistente para evento: " + attendee.getEventid());
 
         Attendee savedAttendee = attendeeRepository.save(attendee);
-        System.out.println("saved attendee: " + savedAttendee.getEventid());
+
+        try {
+            String qrContent = "Asistente: " + savedAttendee.getName()
+                    + " | Email: " + savedAttendee.getEmail()
+                    + " | EventoID: " + savedAttendee.getEventid();
+
+            byte[] qrCode = QRCodeGenerator.generateQRCode(qrContent, 300, 300);
+
+            emailService.sendEmailWithQR(
+                    savedAttendee.getEmail(),
+                    "🎟️ Confirmación de Asistencia - Evento #" + savedAttendee.getEventid(),
+                    savedAttendee.getName(),
+                    qrCode,
+                    true
+            );
+
+        } catch (Exception e) {
+            System.err.println("❌ Error al enviar correo con QR: " + e.getMessage());
+        }
+
         return ResponseEntity.ok(savedAttendee);
     }
+
 
     @GetMapping("/attendees/{id}")
     public ResponseEntity<List<Attendee>> getAllAttendees(@PathVariable Long id){
@@ -141,5 +184,26 @@ public class AuthController {
         }
         return ResponseEntity.ok(attendees);
     }
+    @PostMapping("/contact")
+    public ResponseEntity<String> contactForm(@RequestBody ContactDto contactDto) {
+        try {
+            String subject = "📩 Nuevo mensaje de contacto - AJEVENTS";
+            String body = "<div style='font-family: Arial, sans-serif; color: #333;'>"
+                    + "<h2>Nuevo mensaje desde el formulario de contacto</h2>"
+                    + "<p><b>Nombre:</b> " + contactDto.getNombre() + "</p>"
+                    + "<p><b>Email:</b> " + contactDto.getEmail() + "</p>"
+                    + "<p><b>Mensaje:</b><br>" + contactDto.getMensaje() + "</p>"
+                    + "<br><p>⚡ Este correo fue enviado automáticamente desde el sistema AJEVENTS.</p>"
+                    + "</div>";
 
+            // Aquí defines el correo donde quieres recibir los mensajes (administrador)
+            String adminEmail = "ajeventsctg@gmail.com";
+
+            emailService.sendConfirmationEmail(adminEmail, subject, body);
+
+            return ResponseEntity.ok("✅ Mensaje enviado con éxito");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("❌ Error al enviar el mensaje: " + e.getMessage());
+        }
+    }
 }

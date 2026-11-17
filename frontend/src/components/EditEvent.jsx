@@ -1,41 +1,35 @@
-import React, { useState, useEffect }  from 'react'
+import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import CustomizedInput from './shared/CustomizedInput';
-import { Box, Typography, Button } from '@mui/material'
-import './Popup.css'
-import { updateEvent } from '../helpers/api_communicator';
-import NavigationLink from './shared/NavigationLink';
+import { Box, Typography, Button, Card, CardContent, Divider } from '@mui/material';
 import { format } from "date-fns";
+import NavigationLink from './shared/NavigationLink';
+import { updateEvent } from '../helpers/api_communicator';
 
 const EditEvent = () => {
-
   const auth = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
-  console.log(location)
-
   useEffect(() => {
     if (!auth?.user) {
-      return navigate("*");
+      navigate("*");
     }
   }, [auth, navigate]);
 
-  const [prevEvent, setPrevEvent] = useState(location?.state.Event);
+  const [prevEvent, setPrevEvent] = useState(location?.state?.Event);
 
   const onInputChange = (e) => {
     setPrevEvent({ ...prevEvent, [e.target.name]: e.target.value });
   };
 
-
-  const handleSubmit = async (e)=>{
-
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = new FormData(e.currentTarget)
+    const data = new FormData(e.currentTarget);
 
-    const name = data.get("name"); //we get by name
+    const name = data.get("name");
     const description = data.get("description");
     const place = data.get("place");
     const city = data.get("city");
@@ -43,97 +37,131 @@ const EditEvent = () => {
     const date = data.get("date");
     const username = auth.user.username;
 
-
     try {
-      const response = await updateEvent(`/update/${prevEvent.id}` ,name, username, description, place, city, country, date);
-      console.log(response)
-
-      toast.loading("Event Updated Successfuly");
-      setTimeout(() => {
-        toast.dismiss();
-      }, 3000);
-
-      
-
+      await updateEvent(`/update/${prevEvent.id}`, name, username, description, place, city, country, date);
+      toast.success("Evento actualizado correctamente ✅");
     } catch (error) {
       console.log(error);
-      toast.loading("Event couldn't be added");
-      setTimeout(() => {
-        toast.dismiss();
-      }, 3000);
+      toast.error("Error al actualizar el evento ❌");
     }
+  };
 
-    //props.setTrigger(false)
-    console.log(username + " and " + name);
-  }
+  if (!prevEvent) return null;
 
   return (
-    (
-      <Box
-        display={"flex"}
-        flex={{ xs: 1, md: 0.5 }}
-        justifyContent={"center"}
-        alignItems={"center"}
-        padding={2}
-        ml={"auto"}
-        mt={4}
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="100vh"
+      sx={{
+        backgroundImage: "url('/fondo.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        position: "relative",
+        "::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          bgcolor: "rgba(0,0,0,0.6)",
+          zIndex: 1,
+        },
+      }}
+    >
+      <Card
+        sx={{
+          maxWidth: 1000,
+          width: "100%",
+          borderRadius: "20px",
+          boxShadow: "0 8px 30px rgba(255, 215, 0, 0.3)",
+          p: 3,
+          background: "linear-gradient(145deg, #000000, #1a1a1a)",
+          color: "gold",
+          position: "relative",
+          zIndex: 2,
+          border: "2px solid gold",
+        }}
       >
-        <form onSubmit={handleSubmit} >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-            }}
+        <CardContent>
+          <Typography
+            variant="h5"
+            textAlign="center"
+            fontWeight="bold"
+            sx={{ color: "gold" }}
+            gutterBottom
           >
-            <Typography
-              variant="h4"
-              textAlign="center"
-              padding={2}
-              fontWeight={600}
-              color={'black'}
-            >
-            Edit Event
-            </Typography>
-            <CustomizedInput type="name" name="name" label="Name" value={prevEvent.name} onChange={(e) => onInputChange(e)}/>
-            <CustomizedInput type="description" name="description" label="Description" value={prevEvent.description} onChange={(e) => onInputChange(e)}/>
-            <CustomizedInput type="place" name="place" label="Place" value={prevEvent.place} onChange={(e) => onInputChange(e)}/>
-            <CustomizedInput type="city" name="city" label="City" value={prevEvent.city} onChange={(e) => onInputChange(e)}/>
-            <CustomizedInput type="country" name="country" label="Country" value={prevEvent.country} onChange={(e) => onInputChange(e)}/>
-            <CustomizedInput type="date" name="date" label="Date" value={format(prevEvent.date, "yyyy-MM-dd")} onChange={(e) => onInputChange(e)}/>
-          
+            Editar Evento
+          </Typography>
+          <Divider sx={{ mb: 3, borderColor: "gold" }} />
+
+          <form onSubmit={handleSubmit}>
+            {["name", "description", "place", "city", "country"].map((field) => (
+              <CustomizedInput
+                key={field}
+                type="text"
+                name={field}
+                label={field.charAt(0).toUpperCase() + field.slice(1)}
+                value={prevEvent[field]}
+                onChange={onInputChange}
+                sx={goldInputStyle}
+              />
+            ))}
+
+            <CustomizedInput
+              type="date"
+              name="date"
+              label="Fecha"
+              value={format(new Date(prevEvent.date), "yyyy-MM-dd")}
+              onChange={onInputChange}
+              sx={goldInputStyle}
+            />
+
             <Button
               type="submit"
+              fullWidth
               sx={{
-                px: 2,
-                py: 1,
-                mt: 2,
-                width: "400px",
-                borderRadius: 2,
-                bgcolor: "#AE9D99",
+                mt: 4,
+                py: 1.5,
+                borderRadius: 3,
+                fontWeight: "bold",
+                fontSize: "1rem",
+                bgcolor: "gold",
                 color: "black",
                 ":hover": {
-                  bgcolor: "white",
-                  color: "black",
+                  bgcolor: "#d4af37",
                 },
-                marginBottom:'24px'
               }}
-              
             >
-              Update
+              💾 Actualizar Evento
             </Button>
 
-            <NavigationLink
-                bg="#6D5147"
+            <Box mt={3} textAlign="center">
+              <NavigationLink
+                bg="rgba(255, 215, 0, 0.1)"
                 to="/dashboard"
-                text="Back"
-                textColor="black"
+                text="⬅ Volver al Dashboard"
+                textColor="gold"
               />
-          </Box>
-        </form>
-      </Box>
-    )
-  )
-}
+            </Box>
+          </form>
+        </CardContent>
+      </Card>
+    </Box>
+  );
+};
 
-export default EditEvent
+const goldInputStyle = {
+  "& .MuiInputLabel-root": { color: "gold" },
+  "& .MuiInputLabel-root.Mui-focused": { color: "gold" },
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": { borderColor: "gold" },
+    "&:hover fieldset": { borderColor: "#d4af37" },
+    "&.Mui-focused fieldset": { borderColor: "gold" },
+    "& input": { color: "gold", caretColor: "gold" },
+  },
+};
+
+export default EditEvent;

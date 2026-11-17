@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class EventDto {
+
     private Long id;
     private String username;
     private String name;
@@ -21,4 +21,10 @@ public class EventDto {
     private String place;
     private String description;
     private Date date;
+
+    // 🧠 NUEVO: asistencia real del evento
+    private String attendance;  // "baja", "media" o "alta"
+
+    // 🤖 NUEVO: predicción del modelo de Weka
+    private String predictedAttendance;  // valor predicho
 }

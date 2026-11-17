@@ -1,108 +1,132 @@
-import React, { useEffect } from 'react'
-import { Box, Typography, Button } from '@mui/material'
-import CustomizedInput from './shared/CustomizedInput'
-import {toast } from 'react-hot-toast';
-import { useLocation, useNavigate} from 'react-router-dom';
+import React from 'react';
+import { Box, Typography, Button, Card, CardContent } from '@mui/material';
+import CustomizedInput from './shared/CustomizedInput';
+import { toast } from 'react-hot-toast';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { addAttendee } from '../helpers/api_communicator';
 import NavigationLink from './shared/NavigationLink';
 
-
 const AttendeeRegister = () => {
-
   const location = useLocation();
   const navigate = useNavigate();
-
   const prevEvent = location?.state.Event;
 
-  const handleSubmit = async (e)=>{
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = new FormData(e.currentTarget)
-    const name = data.get("name"); //we get by name
+    const data = new FormData(e.currentTarget);
+
+    const name = data.get("name");
     const email = data.get("email");
 
     try {
-      toast.loading("Registering");
-      
-      const response = await addAttendee(prevEvent.id ,name, email);
-      console.log(response)
+      toast.loading("Registrando asistente...");
 
-      toast.loading("Registered Successfuly");
-      setTimeout(() => {
-        toast.dismiss();
-      }, 3000);
+      const response = await addAttendee(prevEvent.id, name, email);
+      console.log(response);
+
+      toast.success("Registro exitoso ✅");
+      setTimeout(() => toast.dismiss(), 3000);
 
     } catch (error) {
       console.log(error);
-      toast.loading("Failed to register");
-      setTimeout(() => {
-        toast.dismiss();
-      }, 3000);
+      toast.error("Error al registrar ❌");
+      setTimeout(() => toast.dismiss(), 3000);
     }
 
-    console.log(name + " and " + email);
-
+    console.log(name + " y " + email);
     navigate("/allEvents");
   }
 
   return (
-      <Box
-        display={"flex"}
-        flex={{ xs: 1, md: 0.5 }}
-        justifyContent={"center"}
-        alignItems={"center"}
-        padding={2}
-        ml={"auto"}
-        mt={16}
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="100vh"
+      sx={{
+        backgroundImage: "url('/fondo.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        position: "relative",
+        "::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          bgcolor: "rgba(0,0,0,0.5)",
+          zIndex: 1,
+        },
+        p: 2,
+      }}
+    >
+      <Card
+        sx={{
+          maxWidth: 500,
+          width: "100%",
+          borderRadius: "20px",
+          boxShadow: "0 8px 30px rgba(255,215,0,0.3)",
+          background: "linear-gradient(145deg, #fff, #f9f5e1)",
+          border: "2px solid gold",
+          position: "relative",
+          zIndex: 2,
+          p: 3,
+        }}
       >
-        <form onSubmit={handleSubmit} >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-            }}
+        <CardContent>
+          {/* Título */}
+          <Typography
+            variant="h4"
+            textAlign="center"
+            fontWeight="bold"
+            sx={{ color: "gold", mb: 3 }}
           >
-            <Typography
-              variant="h4"
-              textAlign="center"
-              padding={2}
-              fontWeight={600}
-              color={'black'}
-            >
-            Register
-            </Typography>
-            <CustomizedInput type="name" name="name" label="Name" />
-            <CustomizedInput type="email" name="email" label="Email" />
+            Registro de Asistente
+          </Typography>
+
+          {/* Formulario */}
+          <form onSubmit={handleSubmit}>
+            <CustomizedInput type="text" name="name" label="Nombre completo" />
+            <CustomizedInput type="email" name="email" label="Correo electrónico" />
+
+            {/* Botón de registro */}
             <Button
               type="submit"
+              fullWidth
               sx={{
-                px: 2,
-                py: 1,
-                mt: 2,
-                width: "400px",
-                borderRadius: 2,
-                bgcolor: "#AE9D99",
+                mt: 3,
+                py: 1.5,
+                borderRadius: 3,
+                fontWeight: "bold",
+                fontSize: "1rem",
+                bgcolor: "gold",
                 color: "black",
+                transition: "transform 0.3s, box-shadow 0.3s",
                 ":hover": {
-                  bgcolor: "white",
-                  color: "black",
-                  
+                  bgcolor: "#d4af37",
+                  transform: "scale(1.05)",
+                  boxShadow: "0 5px 15px rgba(255,215,0,0.6)",
                 },
-                marginBottom:"24px"
-              }} 
+              }}
             >
-              Register For Event
+              Registrar al Evento
             </Button>
+          </form>
+
+          {/* Botón de regreso */}
+          <Box mt={3} textAlign="center">
             <NavigationLink
-                bg="#6D5147"
-                to="/"
-                text="Back To Home"
-                textColor="black"
-              />
+              bg="rgba(255,215,0,0.1)"
+              to="/"
+              text="⬅ Volver al Inicio"
+              textColor="gold"
+            />
           </Box>
-        </form>
-      </Box>
+        </CardContent>
+      </Card>
+    </Box>
   )
 }
 
-export default AttendeeRegister
+export default AttendeeRegister;

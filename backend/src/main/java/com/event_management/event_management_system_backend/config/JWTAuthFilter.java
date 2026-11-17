@@ -9,38 +9,49 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.http.HttpHeaders;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-
 @RequiredArgsConstructor
 public class JWTAuthFilter extends OncePerRequestFilter {
+
     private final UserAuthenticationProvider userAuthenticationProvider;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest httpServletRequest,
-                                    HttpServletResponse httpServletResponse,
-                                    FilterChain filterChain) throws IOException, ServletException{
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
 
-        String header = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION);
-        if(header != null){
-            String[] authElements = header.split(" ");
+        return path.startsWith("/ai/")
+                || path.startsWith("/login")
+                || path.startsWith("/register")
+                || path.startsWith("/getallevents")
+                || path.startsWith("/api/predict")
+                || path.startsWith("/mcp/");
+    }
 
-            if(authElements.length == 2 && "Bearer".equals(authElements[0]) && authElements[1]!=null){
-                try {
-                    System.out.println(authElements[1]);
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws IOException, ServletException {
 
-                    SecurityContextHolder.getContext().setAuthentication(
-                            userAuthenticationProvider.validateToken(authElements[1])
-                    );
-                }
-                catch (RuntimeException e){
-                    SecurityContextHolder.clearContext();
-                    throw e;
-                }
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        if (header != null && header.startsWith("Bearer ")) {
+            String token = header.substring(7);
+
+            try {
+                SecurityContextHolder.getContext().setAuthentication(
+                        userAuthenticationProvider.validateToken(token)
+                );
+            } catch (RuntimeException e) {
+                SecurityContextHolder.clearContext();
+                // ✅ NO lanzar excepción
             }
         }
 
-        filterChain.doFilter(httpServletRequest, httpServletResponse);
+        filterChain.doFilter(request, response);
     }
 }

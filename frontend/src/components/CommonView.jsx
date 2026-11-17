@@ -1,67 +1,85 @@
-import React, { useState, useEffect }  from 'react'
-import { useLocation, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useLocation } from 'react-router-dom';
 import CustomizedInput from './shared/CustomizedInput';
-import { Box, Typography, Button } from '@mui/material'
-import './Popup.css'
+import { Box, Typography, Card, CardContent } from '@mui/material';
 import NavigationLink from './shared/NavigationLink';
 import { format } from "date-fns";
 
 const CommonViewEvent = () => {
-
   const location = useLocation();
-  const navigate = useNavigate();
+  const prevEvent = location?.state?.Event;
 
-  console.log(location)
-
-
-  const prevEvent = location?.state.Event;
-
+  if (!prevEvent) return <Typography color="red">No se encontró el evento</Typography>;
 
   return (
-    (
-      <Box
-        display={"flex"}
-        flex={{ xs: 1, md: 0.5 }}
-        justifyContent={"center"}
-        alignItems={"center"}
-        padding={2}
-        ml={"auto"}
-        mt={4}
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="100vh"
+      sx={{
+        backgroundImage: "url('/fondo.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        position: "relative",
+        "::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          bgcolor: "rgba(0,0,0,0.5)",
+          zIndex: 1,
+        },
+        p: 2,
+      }}
+    >
+      <Card
+        sx={{
+          maxWidth: 500,
+          width: "100%",
+          borderRadius: "20px",
+          boxShadow: "0 8px 30px rgba(255,215,0,0.3)",
+          background: "linear-gradient(145deg, #fff, #f9f5e1)",
+          color: "black",
+          position: "relative",
+          zIndex: 2,
+          border: "2px solid gold",
+          p: 3,
+        }}
       >
-        <form >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-            }}
+        <CardContent>
+          <Typography
+            variant="h4"
+            textAlign="center"
+            fontWeight="bold"
+            sx={{ color: "gold", mb: 3 }}
           >
-            <Typography
-              variant="h4"
-              textAlign="center"
-              padding={2}
-              fontWeight={600}
-              color={'black'}
-            >
-            Event Details
-            </Typography>
-            <CustomizedInput type="name" name="name" label="Name" value={prevEvent.name}/>
-            <CustomizedInput type="description" name="description" label="Description" value={prevEvent.description}/>
-            <CustomizedInput type="place" name="place" label="Place" value={prevEvent.place}/>
-            <CustomizedInput type="city" name="city" label="City" value={prevEvent.city}/>
-            <CustomizedInput type="country" name="country" label="Country" value={prevEvent.country}/>
-            <CustomizedInput type="date" name="date" label="Date" value={format(prevEvent.date, "yyyy-MM-dd")}/>
+            Detalles del Evento
+          </Typography>
+
+          {/* Inputs estilizados */}
+          <CustomizedInput type="text" name="name" label="Nombre" value={prevEvent.name} disabled />
+          <CustomizedInput type="text" name="description" label="Descripción" value={prevEvent.description} disabled />
+          <CustomizedInput type="text" name="place" label="Lugar" value={prevEvent.place} disabled />
+          <CustomizedInput type="text" name="city" label="Ciudad" value={prevEvent.city} disabled />
+          <CustomizedInput type="text" name="country" label="País" value={prevEvent.country} disabled />
+          <CustomizedInput type="date" name="date" label="Fecha" value={format(prevEvent.date, "yyyy-MM-dd")} disabled />
+
+          {/* Botón de regreso */}
+          <Box mt={3} textAlign="center">
             <NavigationLink
-                bg="#6D5147"
-                to="/allEvents"
-                text="Back"
-                textColor="black"
-              />
+              bg="rgba(255,215,0,0.1)"
+              to="/allEvents"
+              text="⬅ Volver"
+              textColor="gold"
+            />
           </Box>
-        </form>
-      </Box>
-    )
+        </CardContent>
+      </Card>
+    </Box>
   )
 }
 
-export default CommonViewEvent
+export default CommonViewEvent;

@@ -14,7 +14,7 @@ const Header = () => {
       sx={{ bgcolor: "transparent", position: "static", boxShadow: "none" }}>
       <Toolbar sx={{ display: "flex", flexDirection:"row" }}>
         <div>
-        { auth?.isLoggedIn ? 
+        { auth?.isLoggedIn ?
           (
             <>
             <NavigationLink bg="#6D5147"
@@ -23,8 +23,8 @@ const Header = () => {
             text="logout"
             onClick={auth.logout} />
             </>
-          ) 
-          : 
+          )
+          :
           (
             <>
             <div style={{display:'inline-flex'}}>
@@ -41,7 +41,7 @@ const Header = () => {
                 text="Signup"
               />
               </div>
-            </>) 
+            </>)
         }
         </div>
       </Toolbar>

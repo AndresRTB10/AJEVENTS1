@@ -1,102 +1,168 @@
-import React, { useState, useEffect } from 'react'
-import { useAuth} from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Box, Card, CardContent, Typography, Button, Grid } from '@mui/material';
 import { getAllEvents } from '../helpers/api_communicator';
-import { Link, useParams } from "react-router-dom";
 import { format } from "date-fns";
 import NavigationLink from './shared/NavigationLink';
 
-
-const CommonEvents= () => {
+const CommonEvents = () => {
   const [events, setEvents] = useState([]);
-
   const navigate = useNavigate();
 
+  // Cargar eventos al montar el componente
   useEffect(() => {
-      loadEvents();
+    loadEvents();
   }, [navigate]);
 
-  const loadEvents = async () =>{
+  // Función para obtener todos los eventos desde la API
+  const loadEvents = async () => {
     try {
       const response = await getAllEvents();
       const events = response.map(event => ({
         ...event,
-        date: new Date(event.date) // Assuming eventDate is the field with the timestamp
+        date: new Date(event.date)
       }));
-      console.log(events);
       setEvents(events);
     } catch (error) {
-      console.error('Error loading events:', error);
+      console.error('Error cargando los eventos:', error);
     }
   }
 
-
   return (
-    <div>
-      <h1 style={{color: 'black'}}>All events </h1>
-        <div className="container">
-      <div className="py-4">
-        <table className="table border shadow">
-          <thead>
-            <tr>
-              <th scope="col">S.N</th>
-              <th scope="col">Name</th>
-              <th scope="col">City</th>
-              <th scope="col">Country</th>
-              <th scope="col">Date</th>
-              <th scope="col">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {events.map((event, index) => (
-              <tr key={index}>
-                <th scope="row">
-                  {index + 1}
-                </th>
-                <td>{event.name}</td>
-                <td>{event.city}</td>
-                <td>{event.country}</td>
-                <td>{format(event.date, "MMMM do, yyyy")}</td>
-                <td>
-                  <Link
-                    className="btn mx-2 btn-secondary btn-outline-light"
-                    to={{
-                      pathname: "/viewCommonEvent",
-                    }}
-                    state={{Event: event}}
-                  >
-                    View
-                  </Link>
-                  <Link
-                    className="btn btn-outline-primary mx-2 btn-outline-dark"
-                    to={{
-                        pathname: "/registerAttendee",
-                    }}
-                    state={{Event: event}}
-                  >
-                    Register
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        
-        </table>
-      </div>
-    </div>
-    <NavigationLink
-                bg="#6D5147"
-                to="/"
-                text="Back To Home"
-                textColor="black"
-              />
+    // Contenedor principal con fondo y overlay oscuro
+    <Box
+      sx={{
+        minHeight: '100vh',
+        padding: 4,
+        backgroundImage: "url('/fondo.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        position: "relative",
+        "::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          bgcolor: "rgba(0,0,0,0.5)",
+          zIndex: 1,
+        },
+      }}
+    >
+      <Box sx={{ position: 'relative', zIndex: 2 }}>
+        {/* Título principal */}
+        <Typography
+          variant="h4"
+          textAlign="center"
+          fontWeight="bold"
+          sx={{ color: "gold", mb: 4 }}
+        >
+          Todos los Eventos
+        </Typography>
 
-    </div>
+        {/* Contenedor de tarjetas */}
+        <Grid container spacing={3}>
+          {events.map((event, index) => (
+            <Grid item xs={12} sm={6} md={4} key={index}>
+              <Card
+                sx={{
+                  borderRadius: "20px",
+                  boxShadow: "0 8px 20px rgba(255,215,0,0.3)",
+                  background: "linear-gradient(145deg, #fff, #f9f5e1)",
+                  color: "black",
+                  border: "2px solid gold",
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  p: 2,
+                  height: '100%',
+                  transition: "transform 0.3s, box-shadow 0.3s",
+                  "&:hover": {
+                    transform: "translateY(-5px)",
+                    boxShadow: "0 12px 30px rgba(255,215,0,0.5)"
+                  }
+                }}
+              >
+                {/* Contenido de la tarjeta */}
+                <CardContent>
+                  <Typography variant="h6" fontWeight="bold" gutterBottom>
+                    {event.name}
+                  </Typography>
+                  <Typography variant="body2">Ciudad: {event.city}</Typography>
+                  <Typography variant="body2">País: {event.country}</Typography>
+                  <Typography variant="body2">
+                    Fecha: {format(event.date, "MMMM do, yyyy")}
+                  </Typography>
+                </CardContent>
+
+                {/* Botones de acción */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                  {/* Botón Ver */}
+                  <Link
+                    to={{ pathname: "/viewCommonEvent" }}
+                    state={{ Event: event }}
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <Button
+                      variant="contained"
+                      sx={{
+                        bgcolor: "gold",
+                        color: "black",
+                        fontWeight: "bold",
+                        transition: "transform 0.3s, box-shadow 0.3s",
+                        ":hover": {
+                          bgcolor: "#d4af37",
+                          transform: "scale(1.05)",
+                          boxShadow: "0 5px 15px rgba(255,215,0,0.6)"
+                        }
+                      }}
+                    >
+                      Ver
+                    </Button>
+                  </Link>
+
+                  {/* Botón Registrar */}
+                  <Link
+                    to={{ pathname: "/registerAttendee" }}
+                    state={{ Event: event }}
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <Button
+                      variant="outlined"
+                      sx={{
+                        borderColor: "gold",
+                        color: "black",
+                        fontWeight: "bold",
+                        transition: "transform 0.3s, box-shadow 0.3s",
+                        ":hover": {
+                          borderColor: "#d4af37",
+                          transform: "scale(1.05)",
+                          boxShadow: "0 5px 15px rgba(255,215,0,0.3)"
+                        }
+                      }}
+                    >
+                      Registrar
+                    </Button>
+                  </Link>
+                </Box>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Link de regresar al inicio */}
+        <Box mt={4} textAlign="center">
+          <NavigationLink
+            bg="rgba(255,215,0,0.1)"
+            to="/"
+            text="⬅ Volver al Inicio"
+            textColor="gold"
+          />
+        </Box>
+      </Box>
+    </Box>
   )
 }
 
-export default CommonEvents
-
-//onClick={()=> setAddButtonPopup(true)}  
-//<AddEvent trigger={addButtonPopup} setTrigger={setAddButtonPopup}></AddEvent>
+export default CommonEvents;
