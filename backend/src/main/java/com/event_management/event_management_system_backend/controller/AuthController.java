@@ -64,7 +64,11 @@ public class AuthController {
                 + "Atentamente, <br><b>El equipo de AJEVENTS</b></p>"
                 + "</div>";
 
-        emailService.sendConfirmationEmail(newAdmin.getEmail(), subject, body);
+                try {
+            emailService.sendConfirmationEmail(newAdmin.getEmail(), subject, body);
+        } catch (Exception e) {
+            System.err.println("No se pudo enviar el correo de bienvenida: " + e.getMessage());
+        }
 
         return ResponseEntity.created(URI.create("/admins/" + newAdmin.getId()))
                 .body(newAdmin);
