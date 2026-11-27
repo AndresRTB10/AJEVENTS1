@@ -24,7 +24,7 @@ public class DatabaseStartupDiagnostic {
     public void reportDatabase() {
         try {
             jdbc.query("SELECT DATABASE() AS database_name, COUNT(*) AS event_count FROM event",
-                    result -> log.info("AJEVENTS_DB_DIAGNOSTIC database={} event_count={}",
+                    (org.springframework.jdbc.core.RowCallbackHandler) result -> log.info("AJEVENTS_DB_DIAGNOSTIC database={} event_count={}",
                             result.getString("database_name"), result.getLong("event_count")));
         } catch (DataAccessException failure) {
             log.warn("AJEVENTS_DB_DIAGNOSTIC query_failed={}", failure.getClass().getSimpleName());
